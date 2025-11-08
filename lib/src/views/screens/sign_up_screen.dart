@@ -1,26 +1,25 @@
-import 'package:appointment_booking_app/src/views/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/widgets/app_text_field.dart';
-import 'package:appointment_booking_app/src/views/screens/sign_up_screen.dart';
-import 'package:appointment_booking_app/src/views/screens/forgot_password_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -51,9 +50,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 70.0),
 
-              // Login Title
+              // Sign Up Title
               Text(
-                'Login',
+                'Sign Up',
                 style: TextStyle(
                   fontFamily: 'Ubuntu',
                   fontSize: 28.0,
@@ -63,9 +62,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8.0),
 
-              // Login Description
+              // Sign Up Description
               Text(
-                'Login to continue using App',
+                'Sign up to continue using App',
                 style: TextStyle(
                   fontFamily: 'Ubuntu',
                   fontSize: 16.0,
@@ -112,44 +111,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 hintText: 'Enter password',
                 isPassword: true,
               ),
-              const SizedBox(height: 12.0),
+              const SizedBox(height: 24.0),
 
-              // Forgot Password
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    // Navigate to the Forgot Password Screen
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ForgotPasswordScreen(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      color: AppColors.madiBlue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              // Confirm Password Label
+              Text(
+                'Confirm Password',
+                style: TextStyle(
+                  fontFamily: 'Ubuntu',
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
+              ),
+              const SizedBox(height: 8.0),
+
+              // Confirm Password Text Field
+              AppTextField(
+                controller: _confirmPasswordController,
+                hintText: 'Confirm password',
+                isPassword: true,
               ),
               const SizedBox(height: 30.0),
 
-              // Login Button
+              // Sign Up Button
               SizedBox(
                 width: double.infinity,
                 height: 55.0,
                 child: ElevatedButton(
                   onPressed: () {
-                    print('Login Button Pressed!');
+                    print('Sign Up Button Pressed!');
                     print('Email: ${_emailController.text}');
                     print('Password: ${_passwordController.text}');
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
-                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
@@ -159,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     elevation: 0,
                   ),
                   child: Text(
-                    'Login',
+                    'Sign Up',
                     style: TextStyle(
                       fontFamily: 'Ubuntu',
                       color: Colors.white,
@@ -171,12 +163,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 60.0),
 
-              // Register
+              // Login
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    "Don't have an account? ",
+                    "Already have an account? ",
                     style: TextStyle(
                       fontFamily: 'Ubuntu',
                       fontSize: 15.0,
@@ -189,14 +181,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpScreen(),
-                        ),
-                      );
+                      Navigator.of(context).pop();
                     },
                     child: Text(
-                      'Register',
+                      'Login',
                       style: TextStyle(
                         fontFamily: 'Ubuntu',
                         fontSize: 15.0,
