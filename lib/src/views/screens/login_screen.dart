@@ -1,10 +1,10 @@
-import 'package:appointment_booking_app/src/views/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/widgets/app_text_field.dart';
 import 'package:appointment_booking_app/src/views/screens/sign_up_screen.dart';
 import 'package:appointment_booking_app/src/views/screens/forgot_password_screen.dart';
+import 'package:appointment_booking_app/src/views/screens/main_layout_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -147,8 +147,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     print('Login Button Pressed!');
                     print('Email: ${_emailController.text}');
                     print('Password: ${_passwordController.text}');
+                    // --- MODIFICATION ---
+                    // Navigate to the MainLayoutScreen instead of HomeScreen
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(builder: (context) => const MainLayoutScreen()),
                     );
                   },
                   style: ElevatedButton.styleFrom(

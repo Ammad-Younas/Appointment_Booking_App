@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/widgets/app_text_field.dart';
+import 'package:appointment_booking_app/src/views/screens/main_layout_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -142,6 +143,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     print('Sign Up Button Pressed!');
                     print('Email: ${_emailController.text}');
                     print('Password: ${_passwordController.text}');
+                    // --- MODIFICATION ---
+                    // Navigate to the MainLayoutScreen after sign up
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const MainLayoutScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/screens/doctor_details_screen.dart';
+import 'package:appointment_booking_app/src/views/screens/patient_details_screen.dart';
 
 class DoctorCard extends StatelessWidget {
   final Map<String, dynamic> doctor;
@@ -19,9 +20,10 @@ class DoctorCard extends StatelessWidget {
     final int slots = doctor['slots'] ?? 0;
     final String? imagePath = doctor['image'];
 
+    // --- Main Card Tap ---
     return GestureDetector(
       onTap: () {
-        print('Tapped on doctor: $name');
+        // Tapping the main card goes to Doctor Details
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => DoctorDetailsScreen(doctorData: doctor),
@@ -260,8 +262,16 @@ class DoctorCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8.0),
                 ElevatedButton(
+                  // --- MODIFICATION HERE (1st Request) ---
                   onPressed: () {
-                    print('Book appointment for $name');
+                    // This button now goes DIRECTLY to Patient Details
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PatientDetailsScreen(
+                          doctorData: doctor,
+                        ),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
