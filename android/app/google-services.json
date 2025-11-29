@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "724580314024",
+    "project_id": "mad-project-c09af",
+    "storage_bucket": "mad-project-c09af.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:724580314024:android:b7c4b484140cb99d008b9d",
+        "android_client_info": {
+          "package_name": "com.example.appointment_booking_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsG8P8BPrPeErU0Rspy0IijC_HmX8_PHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
