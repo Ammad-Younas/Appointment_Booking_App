@@ -1,8 +1,9 @@
+// lib/src/views/screens/sign_up_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/widgets/app_text_field.dart';
-import 'package:appointment_booking_app/src/views/screens/main_layout_screen.dart';
+import 'package:appointment_booking_app/services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -15,6 +16,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -22,6 +25,158 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  // Email validation
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  // Sign up function
+  Future<void> _handleSignUp() async {
+    // Validate inputs
+    if (_emailController.text.trim().isEmpty) {
+      _showErrorSnackBar('Please enter your email');
+      return;
+    }
+
+    if (!_isValidEmail(_emailController.text.trim())) {
+      _showErrorSnackBar('Please enter a valid email address');
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _showErrorSnackBar('Please enter a password');
+      return;
+    }
+
+    if (_passwordController.text.length < 6) {
+      _showErrorSnackBar('Password must be at least 6 characters');
+      return;
+    }
+
+    if (_confirmPasswordController.text.isEmpty) {
+      _showErrorSnackBar('Please confirm your password');
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _showErrorSnackBar('Passwords do not match');
+      return;
+    }
+
+    // Show loading
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Attempt sign up
+    final result = await _authService.signUpWithEmailPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    // Hide loading
+    setState(() {
+      _isLoading = false;
+    });
+
+    // Handle result
+    if (result['success']) {
+      if (mounted) {
+        // Sign out the user immediately after account creation
+        await _authService.signOut();
+
+        // Show success dialog
+        _showSuccessDialog();
+      }
+    } else {
+      _showErrorSnackBar(result['message']);
+    }
+  }
+
+  // Show error snackbar
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
+  // Show success dialog
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          title: Column(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 60,
+              ),
+              const SizedBox(height: 16.0),
+              Text(
+                'Account Created!',
+                style: TextStyle(
+                  fontFamily: 'Ubuntu',
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.madiBlue,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Your account has been created successfully. Please login to continue.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Ubuntu',
+              color: AppColors.madiGrey,
+            ),
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  // Close dialog and navigate back to login
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); // Go back to login screen
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32.0,
+                    vertical: 12.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.madiBlue,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Text(
+                    'Go to Login',
+                    style: TextStyle(
+                      fontFamily: 'Ubuntu',
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -139,24 +294,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 width: double.infinity,
                 height: 55.0,
                 child: ElevatedButton(
-                  onPressed: () {
-                    print('Sign Up Button Pressed!');
-                    print('Email: ${_emailController.text}');
-                    print('Password: ${_passwordController.text}');
-                    // --- MODIFICATION ---
-                    // Navigate to the MainLayoutScreen after sign up
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const MainLayoutScreen()),
-                    );
-                  },
+                  onPressed: _isLoading ? null : _handleSignUp,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
+                    disabledBackgroundColor: AppColors.madiBlue.withOpacity(0.6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
+                  child: _isLoading
+                      ? SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : Text(
                     'Sign Up',
                     style: TextStyle(
                       fontFamily: 'Ubuntu',
