@@ -6,20 +6,14 @@ class ContentScreen extends StatelessWidget {
   final String title;
   final String content;
 
-  const ContentScreen({
-    super.key,
-    required this.title,
-    required this.content
-  });
+  const ContentScreen({super.key, required this.title, required this.content});
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -31,17 +25,8 @@ class ContentScreen extends StatelessWidget {
               },
               borderRadius: BorderRadius.circular(100),
               child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.madiBlue.withAlpha(57),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    color: AppColors.madiGrey,
-                    size: 18,
-                  ),
-                ),
+                decoration: BoxDecoration(color: AppColors.madiBlue.withValues(alpha: 0.2), shape: BoxShape.circle),
+                child: Center(child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).iconTheme.color, size: 18)),
               ),
             ),
           ),
@@ -53,22 +38,12 @@ class ContentScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
               ),
               const SizedBox(height: 30.0),
               Text(
                 content,
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 16.0,
-                  color: AppColors.madiGrey,
-                  height: 1.5,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, color: Theme.of(context).textTheme.bodyMedium?.color, height: 1.5),
               ),
             ],
           ),

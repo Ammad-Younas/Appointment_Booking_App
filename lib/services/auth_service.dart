@@ -16,151 +16,79 @@ class AuthService {
   Future<Map<String, dynamic>> signUpWithEmailPassword({
     required String email,
     required String password,
+    String role = 'patient', // Default role
   }) async {
     try {
       // Create user in Firebase Auth
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
 
       // Create user document in Firestore
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'email': email,
-        'createdAt': FieldValue.serverTimestamp(),
-        'profileComplete': false,
-      });
+      await _firestore.collection('users').doc(userCredential.user!.uid).set({'email': email, 'role': role, 'createdAt': FieldValue.serverTimestamp(), 'profileComplete': false});
 
-      return {
-        'success': true,
-        'message': 'Account created successfully',
-        'user': userCredential.user,
-      };
+      return {'success': true, 'message': 'Account created successfully', 'user': userCredential.user};
     } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getErrorMessage(e.code),
-      };
+      return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred. Please try again.',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
     }
   }
 
   // Sign In with Email and Password
-  Future<Map<String, dynamic>> signInWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
+  Future<Map<String, dynamic>> signInWithEmailPassword({required String email, required String password}) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
 
-      return {
-        'success': true,
-        'message': 'Login successful',
-        'user': userCredential.user,
-      };
+      return {'success': true, 'message': 'Login successful', 'user': userCredential.user};
     } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getErrorMessage(e.code),
-      };
+      return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred. Please try again.',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
     }
   }
 
   // Send Password Reset Email
-  Future<Map<String, dynamic>> sendPasswordResetEmail({
-    required String email,
-  }) async {
+  Future<Map<String, dynamic>> sendPasswordResetEmail({required String email}) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
 
-      return {
-        'success': true,
-        'message': 'Password reset email sent. Please check your inbox.',
-      };
+      return {'success': true, 'message': 'Password reset email sent. Please check your inbox.'};
     } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getErrorMessage(e.code),
-      };
+      return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred. Please try again.',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
     }
   }
 
   // Verify OTP Code (for phone verification or custom implementation)
-  Future<Map<String, dynamic>> verifyOTP({
-    required String verificationId,
-    required String otp,
-  }) async {
+  Future<Map<String, dynamic>> verifyOTP({required String verificationId, required String otp}) async {
     try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: otp,
-      );
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: otp);
 
       await _auth.signInWithCredential(credential);
 
-      return {
-        'success': true,
-        'message': 'OTP verified successfully',
-      };
+      return {'success': true, 'message': 'OTP verified successfully'};
     } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getErrorMessage(e.code),
-      };
+      return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Invalid OTP. Please try again.',
-      };
+      return {'success': false, 'message': 'Invalid OTP. Please try again.'};
     }
   }
 
   // Update Password (for logged-in users)
-  Future<Map<String, dynamic>> updatePassword({
-    required String newPassword,
-  }) async {
+  Future<Map<String, dynamic>> updatePassword({required String newPassword}) async {
     try {
       User? user = _auth.currentUser;
       if (user == null) {
-        return {
-          'success': false,
-          'message': 'No user logged in',
-        };
+        return {'success': false, 'message': 'No user logged in'};
       }
 
       await user.updatePassword(newPassword);
 
-      return {
-        'success': true,
-        'message': 'Password updated successfully',
-      };
+      return {'success': true, 'message': 'Password updated successfully'};
     } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getErrorMessage(e.code),
-      };
+      return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred. Please try again.',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
     }
   }
 
@@ -174,10 +102,7 @@ class AuthService {
     try {
       User? user = _auth.currentUser;
       if (user == null) {
-        return {
-          'success': false,
-          'message': 'No user logged in',
-        };
+        return {'success': false, 'message': 'No user logged in'};
       }
 
       // Delete user document from Firestore
@@ -186,20 +111,11 @@ class AuthService {
       // Delete user from Firebase Auth
       await user.delete();
 
-      return {
-        'success': true,
-        'message': 'Account deleted successfully',
-      };
+      return {'success': true, 'message': 'Account deleted successfully'};
     } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getErrorMessage(e.code),
-      };
+      return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred. Please try again.',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
     }
   }
 
@@ -244,40 +160,22 @@ class AuthService {
   }
 
   // Re-authenticate user (needed for sensitive operations)
-  Future<Map<String, dynamic>> reAuthenticateUser({
-    required String email,
-    required String password,
-  }) async {
+  Future<Map<String, dynamic>> reAuthenticateUser({required String email, required String password}) async {
     try {
       User? user = _auth.currentUser;
       if (user == null) {
-        return {
-          'success': false,
-          'message': 'No user logged in',
-        };
+        return {'success': false, 'message': 'No user logged in'};
       }
 
-      AuthCredential credential = EmailAuthProvider.credential(
-        email: email,
-        password: password,
-      );
+      AuthCredential credential = EmailAuthProvider.credential(email: email, password: password);
 
       await user.reauthenticateWithCredential(credential);
 
-      return {
-        'success': true,
-        'message': 'Re-authentication successful',
-      };
+      return {'success': true, 'message': 'Re-authentication successful'};
     } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getErrorMessage(e.code),
-      };
+      return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred. Please try again.',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
     }
   }
 }

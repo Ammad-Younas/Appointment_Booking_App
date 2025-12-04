@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/widgets/doctor_card.dart';
-// --- MODIFICATION: Import the new service ---
 import 'package:appointment_booking_app/services/doctor_service.dart';
 
 class CategoryDoctorsScreen extends StatefulWidget {
@@ -15,30 +14,25 @@ class CategoryDoctorsScreen extends StatefulWidget {
 }
 
 class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
-
-  // --- MODIFICATION: Get data from the service ---
-  List<Doctor> _filteredDoctors = [];
+  final DoctorService _doctorService = DoctorService();
+  late Stream<List<Doctor>> _doctorsStream;
 
   @override
   void initState() {
     super.initState();
-    // This logic now works perfectly
     if (widget.categoryName != null) {
-      _filteredDoctors = DoctorService.getDoctorsByCategory(widget.categoryName!);
+      _doctorsStream = _doctorService.getDoctorsByCategory(widget.categoryName!);
     } else {
-      // categoryName is null, so "See All" was clicked
-      _filteredDoctors = DoctorService.getAllDoctors();
+      _doctorsStream = _doctorService.getDoctors();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -50,17 +44,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
               },
               borderRadius: BorderRadius.circular(100),
               child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.madiBlue.withAlpha(57),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    color: AppColors.madiGrey,
-                    size: 18,
-                  ),
-                ),
+                decoration: BoxDecoration(color: AppColors.madiBlue.withValues(alpha: 0.2), shape: BoxShape.circle),
+                child: Center(child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).iconTheme.color, size: 18)),
               ),
             ),
           ),
@@ -72,41 +57,41 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             children: [
               Text(
                 'Appointly',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 34.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
               ),
               const SizedBox(height: 10.0),
               Text(
-                widget.categoryName ?? 'All Doctors', // Title is now correct
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                widget.categoryName ?? 'All Doctors',
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
               ),
               const SizedBox(height: 30.0),
 
-              // --- MODIFICATION: Use the Doctor model ---
-              if (_filteredDoctors.isEmpty)
-                Center(
-                  child: Text(
-                    'No doctors found for this category.',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 16.0,
-                      color: AppColors.madiGrey,
-                    ),
-                  ),
-                )
-              else
-                ..._filteredDoctors.map((doctor) {
-                  return DoctorCard(doctor: doctor.toMap());
-                }).toList(),
+              StreamBuilder<List<Doctor>>(
+                stream: _doctorsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No doctors found for this category.',
+                        style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, color: AppColors.madiGrey),
+                      ),
+                    );
+                  }
+
+                  final doctors = snapshot.data!;
+                  return Column(
+                    children: doctors.map((doctor) {
+                      return DoctorCard(doctor: doctor.toMap());
+                    }).toList(),
+                  );
+                },
+              ),
               const SizedBox(height: 20.0),
             ],
           ),

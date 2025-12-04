@@ -17,12 +17,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: TextStyle(
-        fontFamily: 'Ubuntu',
-        fontSize: 20.0,
-        fontWeight: FontWeight.bold,
-        color: AppColors.madiBlue,
-      ),
+      style: TextStyle(fontFamily: 'Ubuntu', fontSize: 20.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
     );
   }
 
@@ -30,12 +25,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
   Widget _buildSectionContent(String content) {
     return Text(
       content,
-      style: TextStyle(
-        fontFamily: 'Ubuntu',
-        fontSize: 16.0,
-        color: AppColors.madiGrey,
-        height: 1.5,
-      ),
+      style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, color: Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.madiGrey, height: 1.5),
     );
   }
 
@@ -44,7 +34,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
     // Extract data for easier access
     final String name = widget.doctorData['name'] ?? 'Doctor Name';
     final String specialty = widget.doctorData['specialty'] ?? 'Specialty';
-    final double rating = widget.doctorData['rating'] ?? 0.0;
+    final double rating = (widget.doctorData['rating'] ?? 0.0).toDouble();
     final String? imagePath = widget.doctorData['image'];
     final int price = widget.doctorData['price'] ?? 0;
     final int slots = widget.doctorData['slots'] ?? 0;
@@ -54,11 +44,9 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
     final String location = widget.doctorData['location'] ?? 'No details available.';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -70,17 +58,8 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
               },
               borderRadius: BorderRadius.circular(100),
               child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.madiBlue.withAlpha(57),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    color: AppColors.madiGrey,
-                    size: 18,
-                  ),
-                ),
+                decoration: BoxDecoration(color: AppColors.madiBlue.withValues(alpha: 0.2), shape: BoxShape.circle),
+                child: Center(child: Icon(Icons.arrow_back_ios_new, color: AppColors.madiGrey, size: 18)),
               ),
             ),
           ),
@@ -93,24 +72,14 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
               // Header Title
               Text(
                 'Appointly',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 34.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
               ),
               const SizedBox(height: 10.0),
 
               // Page Title
               Text(
                 'Doctor Details',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
               ),
               const SizedBox(height: 30.0),
 
@@ -119,8 +88,9 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
-                  color: AppColors.madiLight.withOpacity(0.5),
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(24.0),
+                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 10, offset: Offset(0, 5))],
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,13 +103,21 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                         height: 120,
                         color: Colors.grey[200],
                         child: imagePath != null
-                            ? Image.asset(
-                          imagePath,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.person, size: 60, color: Colors.grey[400]);
-                          },
-                        )
+                            ? (imagePath.startsWith('http')
+                                  ? Image.network(
+                                      imagePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(Icons.person, size: 60, color: Colors.grey[400]);
+                                      },
+                                    )
+                                  : Image.asset(
+                                      imagePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(Icons.person, size: 60, color: Colors.grey[400]);
+                                      },
+                                    ))
                             : Icon(Icons.person, size: 60, color: Colors.grey[400]),
                       ),
                     ),
@@ -151,31 +129,18 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                         children: [
                           Text(
                             name,
-                            style: TextStyle(
-                              fontFamily: 'Ubuntu',
-                              fontSize: 22.0,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
+                            style: TextStyle(fontFamily: 'Ubuntu', fontSize: 22.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
                           ),
                           const SizedBox(height: 8.0),
                           Text(
                             specialty,
-                            style: TextStyle(
-                              fontFamily: 'Ubuntu',
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.madiGrey,
-                            ),
+                            style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.w500, color: AppColors.madiGrey),
                           ),
                           const SizedBox(height: 16.0),
                           // Rating
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                            decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor, borderRadius: BorderRadius.circular(10)),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -183,12 +148,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                                 const SizedBox(width: 4.0),
                                 Text(
                                   rating.toString(),
-                                  style: TextStyle(
-                                    fontFamily: 'Ubuntu',
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
+                                  style: TextStyle(fontFamily: 'Ubuntu', fontSize: 14.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
                                 ),
                               ],
                             ),
@@ -200,12 +160,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                               const SizedBox(width: 8.0),
                               Text(
                                 '\$$price / session',
-                                style: TextStyle(
-                                  fontFamily: 'Ubuntu',
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                ),
+                                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 15.0, fontWeight: FontWeight.w500, color: Theme.of(context).textTheme.bodyLarge?.color),
                               ),
                             ],
                           ),
@@ -216,12 +171,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                               const SizedBox(width: 8.0),
                               Text(
                                 '$slots Slots Available',
-                                style: TextStyle(
-                                  fontFamily: 'Ubuntu',
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                ),
+                                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 15.0, fontWeight: FontWeight.w500, color: Theme.of(context).textTheme.bodyLarge?.color),
                               ),
                             ],
                           ),
@@ -257,29 +207,16 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                 height: 55.0,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => PatientDetailsScreen(
-                          doctorData: widget.doctorData,
-                        ),
-                      ),
-                    );
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => PatientDetailsScreen(doctorData: widget.doctorData)));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                     elevation: 0,
                   ),
                   child: Text(
                     'Book Appointment',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

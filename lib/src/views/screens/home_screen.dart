@@ -4,8 +4,8 @@ import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/screens/category_doctors_screen.dart';
 import 'package:appointment_booking_app/src/views/widgets/doctor_card.dart';
 import 'package:appointment_booking_app/src/views/screens/notifications_screen.dart';
-// --- MODIFICATION: Import the new service ---
 import 'package:appointment_booking_app/services/doctor_service.dart';
+import 'package:appointment_booking_app/src/views/screens/main_layout_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,23 +15,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final DoctorService _doctorService = DoctorService();
 
-  // --- MODIFICATION: Get data from the service ---
-  final List<Doctor> _topDoctors = DoctorService.getTopDoctors();
-
-  // Specialty categories (this can stay hardcoded)
+  // Specialty categories
   final List<Map<String, dynamic>> _specialties = [
     {'name': 'Nerologist', 'icon': Icons.psychology},
     {'name': 'Cardiologist', 'icon': Icons.favorite},
     {'name': 'Dentist', 'icon': Icons.healing},
-    // Added a category from your service
     {'name': 'Therapist', 'icon': Icons.medical_services},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
@@ -49,15 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         RichText(
                           text: TextSpan(
-                            style: TextStyle(
-                              fontFamily: 'Ubuntu',
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(fontFamily: 'Ubuntu', fontSize: 24.0, fontWeight: FontWeight.bold),
                             children: [
                               TextSpan(
                                 text: 'Hello, ',
-                                style: TextStyle(color: Colors.black),
+                                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                               ),
                               TextSpan(
                                 text: 'Appointly 👋',
@@ -69,33 +62,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 4.0),
                         Text(
                           'How are you today?',
-                          style: TextStyle(
-                            fontFamily: 'Ubuntu',
-                            fontSize: 14.0,
-                            color: Colors.grey[400],
-                            fontWeight: FontWeight.w400,
-                          ),
+                          style: TextStyle(fontFamily: 'Ubuntu', fontSize: 14.0, color: Colors.grey[400], fontWeight: FontWeight.w400),
                         ),
                       ],
                     ),
                     // Notification Bell
                     Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: BoxDecoration(color: Theme.of(context).cardColor, shape: BoxShape.circle),
                       child: IconButton(
-                        icon: Icon(
-                          Icons.notifications_outlined,
-                          color: Colors.black,
-                          size: 28,
-                        ),
+                        icon: Icon(Icons.notifications_outlined, color: Theme.of(context).iconTheme.color, size: 28),
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const NotificationsScreen(),
-                            ),
-                          );
+                          // Switch to Notifications tab (index 2)
+                          final mainLayoutState = context.findAncestorStateOfType<MainLayoutScreenState>();
+                          if (mainLayoutState != null) {
+                            mainLayoutState.changeTab(2);
+                          } else {
+                            // Fallback if not in MainLayout (shouldn't happen normally)
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const NotificationsScreen()));
+                          }
                         },
                       ),
                     ),
@@ -107,10 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: _specialties.map((specialty) {
-                    return _buildSpecialtyCard(
-                      specialty['name'],
-                      specialty['icon'],
-                    );
+                    return _buildSpecialtyCard(specialty['name'], specialty['icon']);
                   }).toList(),
                 ),
                 const SizedBox(height: 30.0),
@@ -121,42 +102,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       'Top Doctors',
-                      style: TextStyle(
-                        fontFamily: 'Ubuntu',
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                      style: TextStyle(fontFamily: 'Ubuntu', fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
                     ),
                     TextButton(
                       onPressed: () {
-                        // --- MODIFICATION: "See All" now works ---
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            // Pass null to show all doctors
-                            builder: (context) => const CategoryDoctorsScreen(categoryName: null),
-                          ),
-                        );
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CategoryDoctorsScreen(categoryName: null)));
                       },
                       child: Text(
                         'See all',
-                        style: TextStyle(
-                          fontFamily: 'Ubuntu',
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.madiBlue,
-                        ),
+                        style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.w600, color: AppColors.madiBlue),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16.0),
 
-                // Top Doctors List
-                // --- MODIFICATION: Use the Doctor model ---
-                ..._topDoctors.map((doctor) {
-                  return DoctorCard(doctor: doctor.toMap());
-                }).toList(),
+                // Top Doctors List with StreamBuilder
+                StreamBuilder<List<Doctor>>(
+                  stream: _doctorService.getTopDoctors(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No doctors found.'));
+                    }
+
+                    final doctors = snapshot.data!;
+                    return Column(
+                      children: doctors.map((doctor) {
+                        return DoctorCard(doctor: doctor.toMap());
+                      }).toList(),
+                    );
+                  },
+                ),
                 const SizedBox(height: 20.0),
               ],
             ),
@@ -170,12 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSpecialtyCard(String name, IconData icon) {
     return GestureDetector(
       onTap: () {
-        // --- MODIFICATION: This now works ---
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => CategoryDoctorsScreen(categoryName: name),
-          ),
-        );
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => CategoryDoctorsScreen(categoryName: name)));
       },
       child: Column(
         children: [
@@ -183,32 +160,16 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 70,
             height: 70,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 2, blurRadius: 8, offset: Offset(0, 2))],
             ),
-            child: Icon(
-              icon,
-              size: 35,
-              color: Colors.black,
-            ),
+            child: Icon(icon, size: 35, color: Theme.of(context).iconTheme.color),
           ),
           const SizedBox(height: 8.0),
           Text(
             name,
-            style: TextStyle(
-              fontFamily: 'Ubuntu',
-              fontSize: 12.0,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
-            ),
+            style: TextStyle(fontFamily: 'Ubuntu', fontSize: 12.0, fontWeight: FontWeight.w500, color: Theme.of(context).textTheme.bodyMedium?.color),
           ),
         ],
       ),

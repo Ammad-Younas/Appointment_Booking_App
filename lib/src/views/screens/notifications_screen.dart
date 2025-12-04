@@ -10,11 +10,9 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         // --- MODIFICATION: AppBar REMOVED ---
         body: SafeArea(
           child: Padding(
@@ -29,28 +27,18 @@ class NotificationsScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Notifications',
-                      style: TextStyle(
-                        fontFamily: 'Ubuntu',
-                        fontSize: 28.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                      style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
                     ),
                     // You can add a "Clear All" button here if you want
                     TextButton(
                       onPressed: () {
-                        // Optional: Clear notifications
-                        // NotificationService.notifications.value = [];
+                        NotificationService.notifications.value = [];
                       },
                       child: Text(
                         'Clear All',
-                        style: TextStyle(
-                          fontFamily: 'Ubuntu',
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.madiGrey,
-                        ),
+                        style: TextStyle(fontFamily: 'Ubuntu', fontWeight: FontWeight.bold, color: AppColors.madiGrey),
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(height: 30.0),
@@ -64,11 +52,7 @@ class NotificationsScreen extends StatelessWidget {
                         return Center(
                           child: Text(
                             'No notifications yet.',
-                            style: TextStyle(
-                              fontFamily: 'Ubuntu',
-                              fontSize: 16.0,
-                              color: AppColors.madiGrey,
-                            ),
+                            style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, color: AppColors.madiGrey),
                           ),
                         );
                       }
@@ -77,7 +61,7 @@ class NotificationsScreen extends StatelessWidget {
                         itemCount: notificationList.length,
                         itemBuilder: (context, index) {
                           final notification = notificationList[index];
-                          return _buildNotificationCard(notification);
+                          return _buildNotificationCard(context, notification);
                         },
                       );
                     },
@@ -91,28 +75,22 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationCard(AppNotification notification) {
+  Widget _buildNotificationCard(BuildContext context, AppNotification notification) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: AppColors.madiLight.withOpacity(0.5),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: Offset(0, 5))],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: AppColors.madiBlue.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.notifications_active,
-              color: AppColors.madiBlue,
-              size: 28,
-            ),
+            decoration: BoxDecoration(color: AppColors.madiBlue.withValues(alpha: 0.15), shape: BoxShape.circle),
+            child: Icon(Icons.notifications_active, color: AppColors.madiBlue, size: 28),
           ),
           const SizedBox(width: 16.0),
           Expanded(
@@ -121,31 +99,17 @@ class NotificationsScreen extends StatelessWidget {
               children: [
                 Text(
                   notification.title,
-                  style: TextStyle(
-                    fontFamily: 'Ubuntu',
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: TextStyle(fontFamily: 'Ubuntu', fontSize: 18.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
                   notification.body,
-                  style: TextStyle(
-                    fontFamily: 'Ubuntu',
-                    fontSize: 14.0,
-                    color: AppColors.madiGrey,
-                  ),
+                  style: TextStyle(fontFamily: 'Ubuntu', fontSize: 14.0, color: Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.madiGrey),
                 ),
                 const SizedBox(height: 8.0),
                 Text(
                   DateFormat('MMM d, h:mm a').format(notification.timestamp),
-                  style: TextStyle(
-                    fontFamily: 'Ubuntu',
-                    fontSize: 12.0,
-                    color: AppColors.madiGrey,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontFamily: 'Ubuntu', fontSize: 12.0, color: AppColors.madiGrey, fontWeight: FontWeight.w500),
                 ),
               ],
             ),

@@ -33,12 +33,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
       padding: const EdgeInsets.only(top: 24.0, bottom: 16.0),
       child: Text(
         title,
-        style: TextStyle(
-          fontFamily: 'Ubuntu',
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-          color: AppColors.madiBlue,
-        ),
+        style: TextStyle(fontFamily: 'Ubuntu', fontSize: 20.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
       ),
     );
   }
@@ -46,11 +41,9 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -62,17 +55,8 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
               },
               borderRadius: BorderRadius.circular(100),
               child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.madiBlue.withAlpha(57),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    color: AppColors.madiGrey,
-                    size: 18,
-                  ),
-                ),
+                decoration: BoxDecoration(color: AppColors.madiBlue.withValues(alpha: 0.2), shape: BoxShape.circle),
+                child: Center(child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).iconTheme.color, size: 18)),
               ),
             ),
           ),
@@ -85,49 +69,27 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
               // Header Title
               Text(
                 'Appointly',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 34.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
               ),
               const SizedBox(height: 10.0),
 
               // Page Title
               Text(
                 'Add Patient Details',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
               ),
               const SizedBox(height: 30.0),
 
               // Full Name
-              AppTextField(
-                controller: _nameController,
-                hintText: 'Full Name',
-                keyboardType: TextInputType.name,
-              ),
+              AppTextField(controller: _nameController, hintText: 'Full Name', keyboardType: TextInputType.name),
               const SizedBox(height: 16.0),
 
               // Phone Number
-              AppTextField(
-                controller: _phoneController,
-                hintText: 'Phone Number',
-                keyboardType: TextInputType.phone,
-              ),
+              AppTextField(controller: _phoneController, hintText: 'Phone Number', keyboardType: TextInputType.phone),
               const SizedBox(height: 16.0),
 
               // Age
-              AppTextField(
-                controller: _ageController,
-                hintText: 'Age',
-                keyboardType: TextInputType.number,
-              ),
+              AppTextField(controller: _ageController, hintText: 'Age', keyboardType: TextInputType.number),
               const SizedBox(height: 24.0),
 
               // Gender Selection (copied from your patient_profile_screen)
@@ -136,20 +98,9 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                 children: [
                   Text(
                     'Gender',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color),
                   ),
-                  Row(
-                    children: [
-                      _buildGenderToggle('Male'),
-                      const SizedBox(width: 16.0),
-                      _buildGenderToggle('Female'),
-                    ],
-                  ),
+                  Row(children: [_buildGenderToggle('Male'), const SizedBox(width: 16.0), _buildGenderToggle('Female')]),
                 ],
               ),
               const SizedBox(height: 60.0),
@@ -161,51 +112,29 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     // Validation
-                    if (_nameController.text.isEmpty ||
-                        _phoneController.text.isEmpty ||
-                        _ageController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Please fill all fields'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
+                    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _ageController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill all fields'), backgroundColor: Colors.red));
                       return;
                     }
 
                     // Collect patient data
-                    final patientData = {
-                      'name': _nameController.text,
-                      'phone': _phoneController.text,
-                      'age': _ageController.text,
-                      'gender': _selectedGender,
-                    };
+                    final patientData = {'name': _nameController.text, 'phone': _phoneController.text, 'age': _ageController.text, 'gender': _selectedGender};
 
                     // Navigate to Schedule Screen
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => ScheduleAppointmentScreen(
-                          doctorData: widget.doctorData,
-                          patientData: patientData,
-                        ),
+                        builder: (context) => ScheduleAppointmentScreen(doctorData: widget.doctorData, patientData: patientData),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                     elevation: 0,
                   ),
                   child: Text(
                     'Schedule Appointment',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -222,12 +151,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
       children: [
         Text(
           gender,
-          style: TextStyle(
-            fontFamily: 'Ubuntu',
-            fontSize: 14.0,
-            color: Colors.black87,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontFamily: 'Ubuntu', fontSize: 14.0, color: Theme.of(context).textTheme.bodyMedium?.color, fontWeight: FontWeight.w500),
         ),
         const SizedBox(width: 8.0),
         GestureDetector(
@@ -239,27 +163,15 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           child: Container(
             width: 50,
             height: 28,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: _selectedGender == gender
-                  ? AppColors.madiBlue.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.2),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: _selectedGender == gender ? AppColors.madiBlue.withValues(alpha: 0.2) : Theme.of(context).disabledColor.withValues(alpha: 0.2)),
             child: AnimatedAlign(
               duration: const Duration(milliseconds: 200),
-              alignment: _selectedGender == gender
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
+              alignment: _selectedGender == gender ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
                 width: 24,
                 height: 24,
                 margin: const EdgeInsets.symmetric(horizontal: 2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _selectedGender == gender
-                      ? AppColors.madiBlue
-                      : Colors.grey,
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: _selectedGender == gender ? AppColors.madiBlue : Colors.grey),
               ),
             ),
           ),

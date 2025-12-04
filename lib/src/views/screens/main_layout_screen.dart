@@ -4,7 +4,6 @@ import 'package:appointment_booking_app/src/views/screens/home_screen.dart';
 import 'package:appointment_booking_app/src/views/screens/my_appointments_screen.dart';
 import 'package:appointment_booking_app/src/views/widgets/app_bottom_nav_bar.dart';
 import 'package:appointment_booking_app/src/views/screens/notifications_screen.dart';
-// --- MODIFICATION ---
 import 'package:appointment_booking_app/src/views/screens/settings_screen.dart';
 
 class MainLayoutScreen extends StatefulWidget {
@@ -12,20 +11,14 @@ class MainLayoutScreen extends StatefulWidget {
   const MainLayoutScreen({super.key, this.initialIndex = 0});
 
   @override
-  State<MainLayoutScreen> createState() => _MainLayoutScreenState();
+  State<MainLayoutScreen> createState() => MainLayoutScreenState();
 }
 
-class _MainLayoutScreenState extends State<MainLayoutScreen> {
+class MainLayoutScreenState extends State<MainLayoutScreen> {
   late int _currentIndex;
 
   // The list of all your main pages
-  final List<Widget> _pages = [
-    const HomeScreen(),
-    const MyAppointmentsScreen(),
-    const NotificationsScreen(),
-    // --- MODIFICATION ---
-    const SettingsScreen(), // Replaced placeholder
-  ];
+  final List<Widget> _pages = [const HomeScreen(), const MyAppointmentsScreen(), const NotificationsScreen(), const SettingsScreen()];
 
   @override
   void initState() {
@@ -33,13 +26,16 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
     _currentIndex = widget.initialIndex;
   }
 
+  void changeTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {

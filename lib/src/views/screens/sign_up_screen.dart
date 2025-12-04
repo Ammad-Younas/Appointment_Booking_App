@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/widgets/app_text_field.dart';
 import 'package:appointment_booking_app/services/auth_service.dart';
+import 'package:appointment_booking_app/src/views/screens/patient_profile_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,6 +18,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
+  String _selectedRole = 'patient';
   bool _isLoading = false;
 
   @override
@@ -71,10 +73,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
 
     // Attempt sign up
-    final result = await _authService.signUpWithEmailPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+    final result = await _authService.signUpWithEmailPassword(email: _emailController.text.trim(), password: _passwordController.text, role: _selectedRole);
 
     // Hide loading
     setState(() {
@@ -84,11 +83,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     // Handle result
     if (result['success']) {
       if (mounted) {
-        // Sign out the user immediately after account creation
-        await _authService.signOut();
-
-        // Show success dialog
-        _showSuccessDialog();
+        // Navigate to Patient Profile Screen to complete profile
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const PatientProfileScreen()), (Route<dynamic> route) => false);
       }
     } else {
       _showErrorSnackBar(result['message']);
@@ -102,89 +98,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
-    );
-  }
-
-  // Show success dialog
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          title: Column(
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 60,
-              ),
-              const SizedBox(height: 16.0),
-              Text(
-                'Account Created!',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            'Your account has been created successfully. Please login to continue.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Ubuntu',
-              color: AppColors.madiGrey,
-            ),
-          ),
-          actions: [
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  // Close dialog and navigate back to login
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.of(context).pop(); // Go back to login screen
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32.0,
-                    vertical: 12.0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.madiBlue,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Text(
-                    'Go to Login',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
@@ -197,95 +119,83 @@ class _SignUpScreenState extends State<SignUpScreen> {
               // Header Title
               Text(
                 'Appointly',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 34.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
               ),
               const SizedBox(height: 70.0),
 
               // Sign Up Title
               Text(
                 'Sign Up',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               const SizedBox(height: 8.0),
 
               // Sign Up Description
               Text(
                 'Sign up to continue using App',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 16.0,
-                  color: AppColors.madiGrey,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, color: AppColors.madiGrey),
               ),
               const SizedBox(height: 40.0),
 
               // Email Label
               Text(
                 'Email',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               const SizedBox(height: 8.0),
 
               // Email Text Field
-              AppTextField(
-                controller: _emailController,
-                hintText: 'Enter your email',
-                keyboardType: TextInputType.emailAddress,
-              ),
+              AppTextField(controller: _emailController, hintText: 'Enter your email', keyboardType: TextInputType.emailAddress),
               const SizedBox(height: 24.0),
 
               // Password Label
               Text(
                 'Password',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               const SizedBox(height: 8.0),
 
               // Password Text Field
-              AppTextField(
-                controller: _passwordController,
-                hintText: 'Enter password',
-                isPassword: true,
-              ),
+              AppTextField(controller: _passwordController, hintText: 'Enter password', isPassword: true),
               const SizedBox(height: 24.0),
 
               // Confirm Password Label
               Text(
                 'Confirm Password',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               const SizedBox(height: 8.0),
 
               // Confirm Password Text Field
-              AppTextField(
-                controller: _confirmPasswordController,
-                hintText: 'Confirm password',
-                isPassword: true,
+              AppTextField(controller: _confirmPasswordController, hintText: 'Confirm password', isPassword: true),
+              const SizedBox(height: 24.0),
+
+              // Role Selection
+              Text(
+                'I am a',
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
+              ),
+              const SizedBox(height: 8.0),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(15.0)),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedRole,
+                    isExpanded: true,
+                    items: ['patient', 'doctor'].map((String role) {
+                      return DropdownMenuItem<String>(
+                        value: role,
+                        child: Text(role == 'patient' ? 'Patient' : 'Doctor', style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0)),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedRole = newValue!;
+                      });
+                    },
+                  ),
+                ),
               ),
               const SizedBox(height: 30.0),
 
@@ -298,29 +208,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
                     disabledBackgroundColor: AppColors.madiBlue.withOpacity(0.6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                     elevation: 0,
                   ),
                   child: _isLoading
-                      ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
+                      ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                          'Sign Up',
+                          style: TextStyle(fontFamily: 'Ubuntu', color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
                 ),
               ),
               const SizedBox(height: 60.0),
@@ -331,28 +227,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 children: <Widget>[
                   Text(
                     "Already have an account? ",
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 15.0,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontSize: 15.0, color: Colors.black),
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      // minimumSize: Size(50, 30),
+                      // tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                     child: Text(
                       'Login',
-                      style: TextStyle(
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.madiBlue,
-                      ),
+                      style: TextStyle(fontFamily: 'Ubuntu', fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
                     ),
                   ),
                 ],

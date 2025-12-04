@@ -6,14 +6,9 @@ class AppTextField extends StatefulWidget {
   final String hintText;
   final bool isPassword;
   final TextInputType keyboardType;
+  final bool readOnly;
 
-  const AppTextField({
-    super.key,
-    required this.controller,
-    required this.hintText,
-    this.isPassword = false,
-    this.keyboardType = TextInputType.text,
-  });
+  const AppTextField({super.key, required this.controller, required this.hintText, this.isPassword = false, this.keyboardType = TextInputType.text, this.readOnly = false});
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -34,30 +29,24 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       obscureText: _isObscured,
       keyboardType: widget.keyboardType,
+      readOnly: widget.readOnly,
       style: TextStyle(fontFamily: 'Ubuntu', color: Colors.black),
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: TextStyle(fontFamily: 'Ubuntu', color: AppColors.madiGrey),
         filled: true,
-        fillColor: AppColors.madiGrey.withAlpha(77),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        fillColor: widget.readOnly ? AppColors.madiGrey.withAlpha(30) : AppColors.madiGrey.withAlpha(77),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
         suffixIcon: widget.isPassword
             ? IconButton(
-          icon: Icon(
-            _isObscured ? Icons.visibility_off : Icons.visibility,
-            color: AppColors.madiGrey,
-          ),
-          onPressed: () {
-            setState(() {
-              _isObscured = !_isObscured;
-            });
-          },
-        )
+                icon: Icon(_isObscured ? Icons.visibility_off : Icons.visibility, color: AppColors.madiGrey),
+                onPressed: () {
+                  setState(() {
+                    _isObscured = !_isObscured;
+                  });
+                },
+              )
             : null,
       ),
     );
