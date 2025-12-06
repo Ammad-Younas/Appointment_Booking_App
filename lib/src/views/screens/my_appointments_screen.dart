@@ -5,6 +5,7 @@ import 'package:appointment_booking_app/src/views/screens/notifications_screen.d
 import 'package:appointment_booking_app/services/appointment_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:appointment_booking_app/src/views/screens/schedule_appointment_screen.dart';
 
 class MyAppointmentsScreen extends StatefulWidget {
   const MyAppointmentsScreen({super.key});
@@ -106,7 +107,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                       final data = doc.data() as Map<String, dynamic>;
                       final status = data['status'] ?? 'Upcoming';
                       if (isUpcoming) {
-                        return status == 'Upcoming';
+                        return status == 'Upcoming' || status == 'Rescheduled';
                       } else {
                         return status == 'Completed' || status == 'Cancelled';
                       }
@@ -218,7 +219,32 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                 width: 70,
                 height: 70,
                 color: Colors.grey[200],
-                child: Icon(Icons.person, size: 40, color: Colors.grey),
+                child: appt['doctorImage'] != null
+                    ? Image.network(
+                        appt['doctorImage'],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(Icons.person, size: 40, color: Colors.grey),
+                      )
+                    : FutureBuilder<QuerySnapshot>(
+                        future: FirebaseFirestore.instance.collection('doctors').where('name', isEqualTo: appt['doctorName']).limit(1).get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Padding(padding: EdgeInsets.all(20.0), child: CircularProgressIndicator(strokeWidth: 2));
+                          }
+                          if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                            final doctorData = snapshot.data!.docs.first.data() as Map<String, dynamic>;
+                            final imageUrl = doctorData['image'] ?? doctorData['imageUrl']; // Support both keys
+                            if (imageUrl != null && imageUrl.isNotEmpty) {
+                              return Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Icon(Icons.person, size: 40, color: Colors.grey),
+                              );
+                            }
+                          }
+                          return Icon(Icons.person, size: 40, color: Colors.grey);
+                        },
+                      ),
               ),
             ),
             const SizedBox(width: 16.0),
@@ -263,8 +289,56 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                 height: 55,
                 child: ElevatedButton(
                   onPressed: isAppointmentSelected
-                      ? () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Reschedule feature coming soon!')));
+                      ? () async {
+                          if (_selectedAppointmentId == null) return;
+
+                          // Show loading
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const Center(child: CircularProgressIndicator()),
+                          );
+
+                          try {
+                            final docSnapshot = await FirebaseFirestore.instance.collection('appointments').doc(_selectedAppointmentId).get();
+
+                            if (!docSnapshot.exists) {
+                              if (context.mounted) Navigator.pop(context);
+                              return;
+                            }
+
+                            final appointment = docSnapshot.data() as Map<String, dynamic>;
+                            final String doctorName = appointment['doctorName'] ?? 'Doctor';
+
+                            // Fetch doctor details by name
+                            final doctorQuery = await FirebaseFirestore.instance.collection('doctors').where('name', isEqualTo: doctorName).limit(1).get();
+
+                            Map<String, dynamic> doctorData;
+                            if (doctorQuery.docs.isNotEmpty) {
+                              doctorData = doctorQuery.docs.first.data();
+                              doctorData['id'] = doctorQuery.docs.first.id;
+                            } else {
+                              // Fallback
+                              doctorData = {'name': doctorName, 'image': 'https://randomuser.me/api/portraits/men/32.jpg', 'qualification': 'Specialist', 'location': 'Hospital'};
+                            }
+
+                            final patientData = {'name': appointment['patientName'] ?? 'User'};
+
+                            if (!context.mounted) return;
+                            Navigator.pop(context); // Close loading
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ScheduleAppointmentScreen(doctorData: doctorData, patientData: patientData, appointmentId: _selectedAppointmentId),
+                              ),
+                            );
+                          } catch (e) {
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                            }
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(

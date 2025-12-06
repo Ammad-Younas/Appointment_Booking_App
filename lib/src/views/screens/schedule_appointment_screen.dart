@@ -11,7 +11,9 @@ class ScheduleAppointmentScreen extends StatefulWidget {
   final Map<String, dynamic> doctorData;
   final Map<String, dynamic> patientData;
 
-  const ScheduleAppointmentScreen({super.key, required this.doctorData, required this.patientData});
+  final String? appointmentId;
+
+  const ScheduleAppointmentScreen({super.key, required this.doctorData, required this.patientData, this.appointmentId});
 
   @override
   State<ScheduleAppointmentScreen> createState() => _ScheduleAppointmentScreenState();
@@ -35,6 +37,7 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isRescheduling = widget.appointmentId != null;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
@@ -62,7 +65,7 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Schedule Appointment',
+                isRescheduling ? 'Reschedule Appointment' : 'Schedule Appointment',
                 style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
               ),
               const SizedBox(height: 24.0),
@@ -82,7 +85,7 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
                 width: double.infinity,
                 height: 55.0,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _bookAppointment,
+                  onPressed: _isLoading ? null : (isRescheduling ? _rescheduleAppointment : _bookAppointment),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
@@ -91,7 +94,7 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          'Confirm Appointment',
+                          isRescheduling ? 'Confirm Reschedule' : 'Confirm Appointment',
                           style: TextStyle(fontFamily: 'Ubuntu', color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
                         ),
                 ),
@@ -200,6 +203,7 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
       doctorId: widget.doctorData['name'], // Using name as ID for now or generate one
       doctorName: doctorName,
       patientName: widget.patientData['name'] ?? 'User',
+      doctorImage: widget.doctorData['image'] ?? widget.doctorData['imageUrl'],
       date: _selectedDay!,
       timeSlot: _selectedTimeSlot!,
       status: 'Upcoming',
@@ -230,13 +234,64 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
       // Show immediate confirmation
       NotificationService.showNotification(id: DateTime.now().millisecondsSinceEpoch ~/ 1000, title: 'Appointment Confirmed!', body: 'Your appointment with $doctorName on $date at $_selectedTimeSlot is confirmed.');
 
-      _showConfirmationDialog();
+      _showConfirmationDialog('Booking Successful!', 'Your appointment with $doctorName on $date at $_selectedTimeSlot has been confirmed.');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result['message'])));
     }
   }
 
-  void _showConfirmationDialog() {
+  Future<void> _rescheduleAppointment() async {
+    if (_selectedDay == null || _selectedTimeSlot == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select a date and time slot'), backgroundColor: Colors.red));
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final String doctorName = widget.doctorData['name'];
+    final String date = _selectedDay.toString().split(' ')[0];
+
+    final result = await _appointmentService.rescheduleAppointment(appointmentId: widget.appointmentId!, newDate: _selectedDay!, newTimeSlot: _selectedTimeSlot!);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (result['success']) {
+      _scheduleNotification(doctorName, date);
+      _showConfirmationDialog('Reschedule Successful!', 'Your appointment with $doctorName has been rescheduled to $date at $_selectedTimeSlot.');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result['message'])));
+    }
+  }
+
+  void _scheduleNotification(String doctorName, String date) {
+    // Schedule notification 15 minutes before
+    // This helper re-uses logic or just accepts passed values.
+    // Ideally we re-calculate or just assume logic is handled in _bookAppointment.
+    // But since _rescheduleAppointment calls this, we need the logic here or extracted.
+    // For now, let's keep it simple or copy logic if needed.
+    // Actually, based on previous code, this helper is needed.
+
+    // We need to parse _selectedTimeSlot to get hour/minute
+    final timeParts = _selectedTimeSlot!.split(' '); // "09:00" "AM"
+    final time = timeParts[0].split(':');
+    int hour = int.parse(time[0]);
+    final int minute = int.parse(time[1]);
+    if (timeParts[1] == 'PM' && hour != 12) hour += 12;
+    if (timeParts[1] == 'AM' && hour == 12) hour = 0;
+
+    final appointmentTime = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day, hour, minute);
+    final notificationTime = appointmentTime.subtract(const Duration(minutes: 15));
+
+    if (notificationTime.isAfter(DateTime.now())) {
+      NotificationService.scheduleNotification(id: appointmentTime.millisecondsSinceEpoch ~/ 1000, title: 'Appointment Reminder', body: 'You have an appointment with $doctorName in 15 minutes!', scheduledTime: notificationTime);
+    }
+  }
+
+  void _showConfirmationDialog(String title, String content) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -244,11 +299,11 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
           backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           title: Text(
-            'Booking Successful!',
+            title,
             style: TextStyle(fontFamily: 'Ubuntu', fontWeight: FontWeight.bold, color: AppColors.madiBlue),
           ),
           content: Text(
-            'Your appointment with ${widget.doctorData['name']} on ${_selectedDay.toString().split(' ')[0]} at $_selectedTimeSlot has been confirmed.',
+            content,
             style: TextStyle(fontFamily: 'Ubuntu', color: Theme.of(context).textTheme.bodyMedium?.color),
           ),
           actions: [
