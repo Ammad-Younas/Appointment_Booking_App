@@ -1,84 +1,113 @@
-# Appointment Booking App
+# Appointly - Doctor Appointment Booking App
 
-A Flutter project for building an appointment booking application (mobile & desktop).
+Appointly is a modern, feature-rich Flutter application designed to simplify the process of booking medical appointments. It provides a seamless experience for patients to find doctors, book appointments, and manage their health schedule, while offering robust features like real-time notifications and secure authentication.
 
-## Overview
+![Appointly Banner](https://via.placeholder.com/1200x500.png?text=Appointly+App+Banner)  <!-- Replace with actual banner if available -->
 
-This repository contains a Flutter application scaffolded to implement appointment booking flows. The code is organized with clear layers (controllers, services, data sources, models, and views) under `lib/`.
+## 🚀 Key Features
 
-Highlights
+*   **📱 Seamless Authentication**:
+    *   Secure Email/Password and OTP-based Login/Sign-up.
+    *   **Persistent Login**: Users stay logged in across app restarts.
+    *   **Password Reset**: Deep linking integration allows users to reset their password directly within the app via email links.
 
-- Dart SDK constraint: ^3.9.2 (see `pubspec.yaml`)
-- Uses `flutter_native_splash` for native splash screens
-- Custom Ubuntu font included in `assets/fonts/`
+*   **📅 Easy Appointment Booking**:
+    *   Browse doctor profiles with detailed information (Rating, Price, Experience).
+    *   Interactive calendar and time-slot selection.
+    *   **Rescheduling**: Easily reschedule existing appointments with automatic slot management.
 
-## Prerequisites
+*   **🔔 Smart Notifications**:
+    *   **Persistent**: Notifications are stored in Firestore and persist across sessions.
+    *   **Dual Reminders**:
+        *   🔔 **15-Minute Reminder**: Get notified before your appointment starts.
+        *   ⏰ **On-Time Alert**: Receive an alert exactly when your appointment begins.
+    *   **Dynamic Updates**: Rescheduling an appointment automatically updates all pending reminders.
 
-- Flutter SDK (stable channel recommended). Install from https://flutter.dev
-- A Dart SDK compatible with the project's constraint (>= 3.9.2)
-- Platform toolchains for the target platforms you plan to run (Android SDK, Xcode for iOS on macOS, etc.)
+*   **👨‍⚕️ Doctor Management**:
+    *   Dynamic doctor listings fetched from Firestore.
+    *   Filter doctors by category (Cardiology, Dentistry, Neurology, etc.).
 
-## Quick start
+*   **🎨 Enhancements**:
+    *   Clean, modern UI compliant with Material Design.
+    *   Profile management for patients.
 
-1. Install dependencies:
+## 🛠️ Technology Stack
 
-   flutter pub get
+*   **Framework**: [Flutter](https://flutter.dev/) (Dart)
+*   **Backend**: [Firebase](https://firebase.google.com/)
+    *   **Authentication**: User management and security.
+    *   **Cloud Firestore**: NoSQL database for appointments, doctors, and notifications.
+*   **State Management**: [Provider](https://pub.dev/packages/provider)
+*   **Key Packages**:
+    *   `flutter_local_notifications`: For scheduling and displaying local notifications.
+    *   `table_calendar`: For the interactive booking calendar.
+    *   `app_links`: For handling deep links (password reset).
+    *   `google_maps_flutter`: Map integration (prepared).
+    *   `timezone`: ensuring notifications fire at the correct local time.
 
-2. Run the app on an available device/emulator:
+## ⚙️ Getting Started
 
-   flutter run
+Follow these steps to set up the project locally.
 
-Run on a specific device:
+### Prerequisites
 
-- Android: flutter run -d android
-- iOS (macOS required): flutter run -d ios
-- Windows: flutter run -d windows
-- Web (Chrome): flutter run -d chrome
+*   **Flutter SDK**: [Install Flutter](https://docs.flutter.dev/get-started/install)
+*   **Dart SDK**: Included with Flutter.
+*   **Firebase Account**: You need a Firebase project.
 
-## Build
+### Installation
 
-Build an APK for Android:
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/your-username/appointment_booking_app.git
+    cd appointment_booking_app
+    ```
 
-flutter build apk
+2.  **Install Dependencies**
+    ```bash
+    flutter pub get
+    ```
 
-Build for iOS (requires macOS):
+3.  **Firebase Configuration**
+    *   This project uses `flutterfire_cli`.
+    *   Run `flutterfire configure` to generate the `firebase_options.dart` file for your specific Firebase project.
+    *   Ensure **Authentication** (Email/Password), **Firestore**, and **Storage** are enabled in your Firebase Console.
+    *   For **Password Reset Deep Linking**:
+        *   Add your Android Package Name (`com.example.appointment_booking_app`) to your Firebase Project settings.
+        *   Ensure the SHA-1 and SHA-256 keys are added.
 
-flutter build ios
+4.  **Run the App**
+    ```bash
+    flutter run
+    ```
 
-## Project structure
+## 📂 Project Structure
 
-- android/, ios/, linux/, macos/, windows/ — native platform projects
-- assets/ — fonts, images and other static resources
-- lib/ — main application code
-  - controllers/ — controllers and state management
-  - data/
-    - local/ — local persistence helpers
-    - remote/ — API clients and remote data sources
-  - models/ — data models and DTOs
-  - services/ — business logic and helpers
-  - src/
-    - views/ — UI screens and widgets
-  - utils/ — utilities and common helpers
-  - app_colors.dart — color constants
-  - main.dart — application entrypoint
+```
+lib/
+├── main.dart                  # Entry point & App Configuration
+├── firebase_options.dart      # Firebase Generated Config
+├── services/                  # Business Logic & API calls (Auth, Notification, etc.)
+├── src/
+│   ├── views/
+│   │   ├── screens/           # Full-screen widgets (Login, Home, Booking)
+│   │   └── widgets/           # Reusable UI components
+│   └── ...
+└── utils/                     # Constants, Themes, and Helper functions
+```
 
-## Tests
+## 📸 Screenshots
 
-Run unit and widget tests with:
+| Home Screen | Booking Screen | Notifications | Profile |
+|:---:|:---:|:---:|:---:|
+| ![Home](https://via.placeholder.com/200x400?text=Home) | ![Booking](https://via.placeholder.com/200x400?text=Booking) | ![Notifs](https://via.placeholder.com/200x400?text=Notifications) | ![Profile](https://via.placeholder.com/200x400?text=Profile) |
 
-flutter test
+<!-- Add actual screenshots to an /screenshots folder and link them here -->
 
-## Notes & tips
+## 🤝 Contributing
 
-- The project uses `flutter_native_splash`. After modifying splash settings in `pubspec.yaml`, regenerate the native splash with the package's instructions (for example, `flutter pub run flutter_native_splash:create`).
-- When adding new assets (fonts, images), register them in `pubspec.yaml`.
+Contributions are welcome! Please fork the repository and create a pull request with your changes.
 
-## Contributing
+## 📄 License
 
-Contributions are welcome. Please open issues or pull requests with clear descriptions and reproduction steps.
-
-## License & contact
-
-No license is included in this repository. Add a LICENSE file (for example MIT) if you wish to open-source the repo.
-
-For questions, contact the repository owner.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
