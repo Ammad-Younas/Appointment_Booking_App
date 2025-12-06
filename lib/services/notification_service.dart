@@ -38,23 +38,26 @@ class NotificationService {
 
   // Show a simple notification and save to Firestore
   static Future<void> showNotification({required int id, required String title, required String body, String? userId}) async {
+    // 1. Show Local Notification
     try {
       const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails('appointment_channel', 'Appointments', channelDescription: 'Notifications for appointment updates', importance: Importance.max, priority: Priority.high);
 
       const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
 
       await _notificationsPlugin.show(id, title, body, platformChannelSpecifics);
-
-      if (userId != null) {
-        await saveNotificationToFirestore(userId, title, body);
-      }
     } catch (e) {
-      debugPrint('Error showing notification: $e');
+      debugPrint('Error showing local notification: $e');
+    }
+
+    // 2. Save to Firestore (Independent of local notification success)
+    if (userId != null) {
+      await saveNotificationToFirestore(userId, title, body);
     }
   }
 
   // Schedule a notification
   static Future<void> scheduleNotification({required int id, required String title, required String body, required DateTime scheduledTime, String? userId}) async {
+    // 1. Schedule Local Notification
     try {
       await _notificationsPlugin.zonedSchedule(
         id,
@@ -66,13 +69,18 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
-
-      // Save to Firestore so user sees it in their history
-      if (userId != null) {
-        await saveNotificationToFirestore(userId, title, body);
-      }
     } catch (e) {
-      debugPrint('Error scheduling notification: $e');
+      debugPrint('Error scheduling local notification: $e');
+    }
+
+    // 2. Save to Firestore
+    // Note: This saves the notification to history IMMEDIATELY when scheduled.
+    // If you want it to appear only when sent, this logic needs to be server-side or handled differently.
+    // For now, we save it as a "Pending" or "Scheduled" reminder log.
+    if (userId != null) {
+      // Modify body to indicate it's a reminder? Or keep as is.
+      // Saving it now ensures persistence.
+      await saveNotificationToFirestore(userId, title, body, scheduledTime: scheduledTime);
     }
   }
 
@@ -84,9 +92,14 @@ class NotificationService {
     await _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
   }
 
-  static Future<void> saveNotificationToFirestore(String userId, String title, String body) async {
+  static Future<void> saveNotificationToFirestore(String userId, String title, String body, {DateTime? scheduledTime}) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(userId).collection('notifications').add({'title': title, 'body': body, 'timestamp': FieldValue.serverTimestamp(), 'read': false});
+      await FirebaseFirestore.instance.collection('users').doc(userId).collection('notifications').add({
+        'title': title,
+        'body': body,
+        'timestamp': scheduledTime != null ? Timestamp.fromDate(scheduledTime) : FieldValue.serverTimestamp(),
+        'read': false,
+      });
     } catch (e) {
       debugPrint('Error saving notification to Firestore: $e');
     }

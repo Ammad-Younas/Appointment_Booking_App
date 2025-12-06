@@ -44,6 +44,19 @@ class NotificationsScreen extends StatelessWidget {
                         return const Center(child: CircularProgressIndicator());
                       }
 
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              'Error loading notifications:\n${snapshot.error}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        );
+                      }
+
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return Center(
                           child: Text(
@@ -55,10 +68,28 @@ class NotificationsScreen extends StatelessWidget {
 
                       final docs = snapshot.data!.docs;
 
+                      // Filter out future notifications (reminders that haven't happened yet)
+                      final now = DateTime.now();
+                      final pastNotifications = docs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final Timestamp? timestamp = data['timestamp'] as Timestamp?;
+                        if (timestamp == null) return true; // Show if no timestamp
+                        return timestamp.toDate().isBefore(now);
+                      }).toList();
+
+                      if (pastNotifications.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No notifications yet.',
+                            style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, color: AppColors.madiGrey),
+                          ),
+                        );
+                      }
+
                       return ListView.builder(
-                        itemCount: docs.length,
+                        itemCount: pastNotifications.length,
                         itemBuilder: (context, index) {
-                          final data = docs[index].data() as Map<String, dynamic>;
+                          final data = pastNotifications[index].data() as Map<String, dynamic>;
                           final Timestamp? timestamp = data['timestamp'] as Timestamp?;
 
                           final notification = AppNotification(title: data['title'] ?? 'Notification', body: data['body'] ?? '', timestamp: timestamp?.toDate() ?? DateTime.now());
