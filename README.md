@@ -2,8 +2,6 @@
 
 Appointly is a modern, feature-rich Flutter application designed to simplify the process of booking medical appointments. It provides a seamless experience for patients to find doctors, book appointments, and manage their health schedule, while offering robust features like real-time notifications and secure authentication.
 
-![Appointly Banner](https://via.placeholder.com/1200x500.png?text=Appointly+App+Banner)  <!-- Replace with actual banner if available -->
-
 ## 🚀 Key Features
 
 *   **📱 Seamless Authentication**:
@@ -95,14 +93,6 @@ lib/
 │   └── ...
 └── utils/                     # Constants, Themes, and Helper functions
 ```
-
-## 📸 Screenshots
-
-| Home Screen | Booking Screen | Notifications | Profile |
-|:---:|:---:|:---:|:---:|
-| ![Home](https://via.placeholder.com/200x400?text=Home) | ![Booking](https://via.placeholder.com/200x400?text=Booking) | ![Notifs](https://via.placeholder.com/200x400?text=Notifications) | ![Profile](https://via.placeholder.com/200x400?text=Profile) |
-
-<!-- Add actual screenshots to an /screenshots folder and link them here -->
 
 ## 🤝 Contributing
 
