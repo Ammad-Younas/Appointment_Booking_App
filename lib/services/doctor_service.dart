@@ -63,19 +63,4 @@ class DoctorService {
       }).toList();
     });
   }
-
-  // Seed initial data (Run this once if needed)
-  Future<void> seedDoctors() async {
-    final List<Map<String, dynamic>> initialDoctors = [
-      {'name': 'Dr. Assad Abbas', 'specialty': 'Nerologist', 'rating': 4.5, 'price': 28, 'slots': 5, 'image': 'https://randomuser.me/api/portraits/men/32.jpg', 'about': 'Dr. Assad Abbas is a highly experienced Nerologist with over 10 years of practice.', 'qualification': '1. Medical Degree from Metropolis University.\n2. Board Certified in Neurology.', 'location': 'City Hospital, 123 Health St, Suite 405, Metropolis, USA'},
-      {'name': 'Dr. Kamran', 'specialty': 'Dentist', 'rating': 4.3, 'price': 25, 'slots': 5, 'image': 'https://randomuser.me/api/portraits/men/45.jpg', 'about': 'Dr. Kamran is a skilled Dentist known for a gentle touch and excellent patient outcomes.', 'qualification': '1. DDS from Metropolis Dental School.\n2. Member of the National Dental Association.', 'location': 'Downtown Dental, 456 Main St, Metropolis, USA'},
-      {'name': 'Dr. Aliyah Khan', 'specialty': 'Nerologist', 'rating': 4.8, 'price': 35, 'slots': 3, 'image': 'https://randomuser.me/api/portraits/women/44.jpg', 'about': 'Dr. Aliyah Khan specializes in complex neurological disorders.', 'qualification': '1. MD, PhD from Central City University.\n2. Chief of Neurology at City Hospital.', 'location': 'City Hospital, 123 Health St, Suite 405, Metropolis, USA'},
-      {'name': 'Dr. Farhan Ahmed', 'specialty': 'Cardiologist', 'rating': 4.7, 'price': 40, 'slots': 2, 'image': 'https://randomuser.me/api/portraits/men/22.jpg', 'about': 'Dr. Farhan Ahmed is a board-certified Cardiologist focused on preventative care.', 'qualification': '1. MD from Starling City University.\n2. Fellow of the American College of Cardiology.', 'location': 'Metropolis Heart Institute, 789 Park Ave, Metropolis, USA'},
-      {'name': 'Dr. Sara Ali', 'specialty': 'Dentist', 'rating': 4.6, 'price': 30, 'slots': 8, 'image': 'https://randomuser.me/api/portraits/women/68.jpg', 'about': 'Dr. Sara Ali provides comprehensive dental care for the whole family.', 'qualification': '1. DMD from Metropolis Dental School.\n2. Certified in Pediatric Dentistry.', 'location': 'Family Dental Care, 101 Suburb St, Metropolis, USA'},
-    ];
-
-    for (var doctor in initialDoctors) {
-      await _firestore.collection('doctors').add(doctor);
-    }
-  }
 }

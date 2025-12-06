@@ -7,7 +7,8 @@ import 'package:appointment_booking_app/src/views/screens/login_screen.dart';
 import 'package:appointment_booking_app/services/auth_service.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {
-  const UpdatePasswordScreen({super.key});
+  final String? oobCode;
+  const UpdatePasswordScreen({super.key, this.oobCode});
 
   @override
   State<UpdatePasswordScreen> createState() => _UpdatePasswordScreenState();
@@ -54,10 +55,14 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       _isLoading = true;
     });
 
-    // Attempt to update password
-    final result = await _authService.updatePassword(
-      newPassword: _newPasswordController.text,
-    );
+    Map<String, dynamic> result;
+
+    // Check if we are doing a reset (using oobCode) or an update (logged in user)
+    if (widget.oobCode != null) {
+      result = await _authService.confirmPasswordReset(code: widget.oobCode!, newPassword: _newPasswordController.text);
+    } else {
+      result = await _authService.updatePassword(newPassword: _newPasswordController.text);
+    }
 
     // Hide loading
     setState(() {
@@ -82,9 +87,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -96,63 +99,35 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           title: Column(
             children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 60,
-              ),
+              Icon(Icons.check_circle, color: Colors.green, size: 60),
               const SizedBox(height: 16.0),
               Text(
                 'Password Updated!',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontWeight: FontWeight.bold, color: AppColors.madiBlue),
               ),
             ],
           ),
           content: Text(
             'Your password has been successfully updated. Please login with your new password.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Ubuntu',
-              color: AppColors.madiGrey,
-            ),
+            style: TextStyle(fontFamily: 'Ubuntu', color: AppColors.madiGrey),
           ),
           actions: [
             Center(
               child: TextButton(
                 onPressed: () {
                   // Navigate to login screen and clear all previous routes
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                        (Route<dynamic> route) => false,
-                  );
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginScreen()), (Route<dynamic> route) => false);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32.0,
-                    vertical: 12.0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.madiBlue,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                  decoration: BoxDecoration(color: AppColors.madiBlue, borderRadius: BorderRadius.circular(25)),
                   child: Text(
                     'Go to Login',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
               ),
@@ -166,9 +141,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -182,17 +155,8 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
               },
               borderRadius: BorderRadius.circular(100),
               child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.madiBlue.withAlpha(57),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    color: AppColors.madiGrey,
-                    size: 18,
-                  ),
-                ),
+                decoration: BoxDecoration(color: AppColors.madiBlue.withAlpha(57), shape: BoxShape.circle),
+                child: Center(child: Icon(Icons.arrow_back_ios_new, color: AppColors.madiGrey, size: 18)),
               ),
             ),
           ),
@@ -205,36 +169,21 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
               // Header Title
               Text(
                 'Appointly',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 34.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
               ),
               const SizedBox(height: 70.0),
 
               // Update Password Title
               Text(
                 'Update Password',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.madiBlue,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
               ),
               const SizedBox(height: 16.0),
 
               // Description
               Text(
                 'Please enter your new password. Make sure it is at least 6 characters long.',
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 14.0,
-                  color: AppColors.madiGrey,
-                  height: 1.5,
-                ),
+                style: TextStyle(fontFamily: 'Ubuntu', fontSize: 14.0, color: AppColors.madiGrey, height: 1.5),
               ),
               const SizedBox(height: 40.0),
 
@@ -243,22 +192,13 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                 padding: const EdgeInsets.only(left: 3.0),
                 child: Text(
                   'New Password',
-                  style: TextStyle(
-                    fontFamily: 'Ubuntu',
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),
               const SizedBox(height: 8.0),
 
               // New password Text Field
-              AppTextField(
-                controller: _newPasswordController,
-                hintText: 'Enter new password',
-                isPassword: true,
-              ),
+              AppTextField(controller: _newPasswordController, hintText: 'Enter new password', isPassword: true),
               const SizedBox(height: 24.0),
 
               // Confirm password Label
@@ -266,22 +206,13 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                 padding: const EdgeInsets.only(left: 3.0),
                 child: Text(
                   'Confirm Password',
-                  style: TextStyle(
-                    fontFamily: 'Ubuntu',
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),
               const SizedBox(height: 8.0),
 
               // Confirm password Text Field
-              AppTextField(
-                controller: _confirmPasswordController,
-                hintText: 'Confirm new password',
-                isPassword: true,
-              ),
+              AppTextField(controller: _confirmPasswordController, hintText: 'Confirm new password', isPassword: true),
               const SizedBox(height: 30.0),
 
               // Update Password Button
@@ -293,29 +224,15 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.madiBlue,
                     disabledBackgroundColor: AppColors.madiBlue.withOpacity(0.6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                     elevation: 0,
                   ),
                   child: _isLoading
-                      ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
+                      ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : Text(
-                    'Update Password',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                          'Update Password',
+                          style: TextStyle(fontFamily: 'Ubuntu', color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
                 ),
               ),
             ],

@@ -46,12 +46,33 @@ class AuthService {
     }
   }
 
-  // Send Password Reset Email
+  // Send Password Reset Email with App Link settings
   Future<Map<String, dynamic>> sendPasswordResetEmail({required String email}) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      // Configure settings to open the app
+      final ActionCodeSettings actionCodeSettings = ActionCodeSettings(
+        url: 'https://appointly-app.firebaseapp.com/__/auth/action?mode=resetPassword', // Your Firebase project hosting URL
+        handleCodeInApp: true,
+        androidPackageName: 'com.example.appointment_booking_app', // Replace with your actual package name found in AndroidManifest.xml
+        androidInstallApp: true,
+        androidMinimumVersion: '12',
+      );
 
-      return {'success': true, 'message': 'Password reset email sent. Please check your inbox.'};
+      await _auth.sendPasswordResetEmail(email: email, actionCodeSettings: actionCodeSettings);
+
+      return {'success': true, 'message': 'Password reset email sent. Please check your inbox and click the link to reset your password in the app.'};
+    } on FirebaseAuthException catch (e) {
+      return {'success': false, 'message': _getErrorMessage(e.code)};
+    } catch (e) {
+      return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
+    }
+  }
+
+  // Confirm Password Reset (using the code from the email link)
+  Future<Map<String, dynamic>> confirmPasswordReset({required String code, required String newPassword}) async {
+    try {
+      await _auth.confirmPasswordReset(code: code, newPassword: newPassword);
+      return {'success': true, 'message': 'Password reset successfully. Please login with your new password.'};
     } on FirebaseAuthException catch (e) {
       return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
