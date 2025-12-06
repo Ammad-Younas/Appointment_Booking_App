@@ -6,9 +6,9 @@ class AppointmentService {
   // Book an appointment
   Future<Map<String, dynamic>> bookAppointment({required String userId, required String doctorId, required String doctorName, required String patientName, required DateTime date, required String timeSlot, required String status, String? doctorImage}) async {
     try {
-      await _firestore.collection('appointments').add({'userId': userId, 'doctorId': doctorId, 'doctorName': doctorName, 'doctorImage': doctorImage, 'patientName': patientName, 'date': Timestamp.fromDate(date), 'timeSlot': timeSlot, 'status': status, 'createdAt': FieldValue.serverTimestamp()});
+      final docRef = await _firestore.collection('appointments').add({'userId': userId, 'doctorId': doctorId, 'doctorName': doctorName, 'doctorImage': doctorImage, 'patientName': patientName, 'date': Timestamp.fromDate(date), 'timeSlot': timeSlot, 'status': status, 'createdAt': FieldValue.serverTimestamp()});
 
-      return {'success': true, 'message': 'Appointment booked successfully'};
+      return {'success': true, 'message': 'Appointment booked successfully', 'appointmentId': docRef.id};
     } catch (e) {
       return {'success': false, 'message': 'Failed to book appointment: $e'};
     }

@@ -224,15 +224,24 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
 
       final appointmentTime = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day, hour, minute);
 
-      // Schedule notification 15 minutes before
-      final notificationTime = appointmentTime.subtract(const Duration(minutes: 15));
+      // Use the newly created appointment ID for stable notification ID
+      final String appointmentId = result['appointmentId'];
+      final int baseNotificationId = appointmentId.hashCode;
 
-      if (notificationTime.isAfter(DateTime.now())) {
-        NotificationService.scheduleNotification(id: appointmentTime.millisecondsSinceEpoch ~/ 1000, title: 'Appointment Reminder', body: 'You have an appointment with $doctorName in 15 minutes!', scheduledTime: notificationTime);
+      // 1. Schedule notification 15 minutes before
+      final notificationTime15Min = appointmentTime.subtract(const Duration(minutes: 15));
+      if (notificationTime15Min.isAfter(DateTime.now())) {
+        NotificationService.scheduleNotification(id: baseNotificationId, title: 'Appointment Reminder', body: 'You have an appointment with $doctorName in 15 minutes!', scheduledTime: notificationTime15Min, userId: user.uid);
+      }
+
+      // 2. Schedule notification at exact time
+      // Use a derived ID (e.g., base + 1) to avoid collision
+      if (appointmentTime.isAfter(DateTime.now())) {
+        NotificationService.scheduleNotification(id: baseNotificationId + 1, title: 'Appointment Started', body: 'Your appointment with $doctorName is starting now!', scheduledTime: appointmentTime, userId: user.uid);
       }
 
       // Show immediate confirmation
-      NotificationService.showNotification(id: DateTime.now().millisecondsSinceEpoch ~/ 1000, title: 'Appointment Confirmed!', body: 'Your appointment with $doctorName on $date at $_selectedTimeSlot is confirmed.');
+      NotificationService.showNotification(id: DateTime.now().millisecondsSinceEpoch ~/ 1000, title: 'Appointment Confirmed!', body: 'Your appointment with $doctorName on $date at $_selectedTimeSlot is confirmed.', userId: user.uid);
 
       _showConfirmationDialog('Booking Successful!', 'Your appointment with $doctorName on $date at $_selectedTimeSlot has been confirmed.');
     } else {
@@ -250,6 +259,7 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
       _isLoading = true;
     });
 
+    final User? user = FirebaseAuth.instance.currentUser;
     final String doctorName = widget.doctorData['name'];
     final String date = _selectedDay.toString().split(' ')[0];
 
@@ -260,21 +270,23 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
     });
 
     if (result['success']) {
-      _scheduleNotification(doctorName, date);
+      // Use existing appointmentId hash for consistent ID - PREVENTS DUPLICATES/OLD REMINDERS
+      final int baseNotificationId = widget.appointmentId!.hashCode;
+
+      if (user != null) {
+        _scheduleNotification(doctorName, date, baseNotificationId, user.uid);
+
+        // Also show confirmation
+        NotificationService.showNotification(id: DateTime.now().millisecondsSinceEpoch ~/ 1000, title: 'Reschedule Confirmed!', body: 'Your appointment with $doctorName has been rescheduled to $date at $_selectedTimeSlot.', userId: user.uid);
+      }
+
       _showConfirmationDialog('Reschedule Successful!', 'Your appointment with $doctorName has been rescheduled to $date at $_selectedTimeSlot.');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result['message'])));
     }
   }
 
-  void _scheduleNotification(String doctorName, String date) {
-    // Schedule notification 15 minutes before
-    // This helper re-uses logic or just accepts passed values.
-    // Ideally we re-calculate or just assume logic is handled in _bookAppointment.
-    // But since _rescheduleAppointment calls this, we need the logic here or extracted.
-    // For now, let's keep it simple or copy logic if needed.
-    // Actually, based on previous code, this helper is needed.
-
+  void _scheduleNotification(String doctorName, String date, int baseNotificationId, String userId) {
     // We need to parse _selectedTimeSlot to get hour/minute
     final timeParts = _selectedTimeSlot!.split(' '); // "09:00" "AM"
     final time = timeParts[0].split(':');
@@ -284,10 +296,16 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
     if (timeParts[1] == 'AM' && hour == 12) hour = 0;
 
     final appointmentTime = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day, hour, minute);
-    final notificationTime = appointmentTime.subtract(const Duration(minutes: 15));
 
-    if (notificationTime.isAfter(DateTime.now())) {
-      NotificationService.scheduleNotification(id: appointmentTime.millisecondsSinceEpoch ~/ 1000, title: 'Appointment Reminder', body: 'You have an appointment with $doctorName in 15 minutes!', scheduledTime: notificationTime);
+    // 1. 15 Minutes Before
+    final notificationTime15Min = appointmentTime.subtract(const Duration(minutes: 15));
+    if (notificationTime15Min.isAfter(DateTime.now())) {
+      NotificationService.scheduleNotification(id: baseNotificationId, title: 'Appointment Reminder', body: 'You have an appointment with $doctorName in 15 minutes!', scheduledTime: notificationTime15Min, userId: userId);
+    }
+
+    // 2. Exact Time
+    if (appointmentTime.isAfter(DateTime.now())) {
+      NotificationService.scheduleNotification(id: baseNotificationId + 1, title: 'Appointment Started', body: 'Your appointment with $doctorName is starting now!', scheduledTime: appointmentTime, userId: userId);
     }
   }
 

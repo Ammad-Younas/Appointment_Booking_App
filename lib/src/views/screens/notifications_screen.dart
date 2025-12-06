@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/services/notification_service.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -29,26 +31,20 @@ class NotificationsScreen extends StatelessWidget {
                       'Notifications',
                       style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color),
                     ),
-                    // You can add a "Clear All" button here if you want
-                    TextButton(
-                      onPressed: () {
-                        NotificationService.notifications.value = [];
-                      },
-                      child: Text(
-                        'Clear All',
-                        style: TextStyle(fontFamily: 'Ubuntu', fontWeight: FontWeight.bold, color: AppColors.madiGrey),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 30.0),
 
                 // --- List of Notifications ---
                 Expanded(
-                  child: ValueListenableBuilder<List<AppNotification>>(
-                    valueListenable: NotificationService.notifications,
-                    builder: (context, notificationList, child) {
-                      if (notificationList.isEmpty) {
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: NotificationService.getNotificationsStream(FirebaseAuth.instance.currentUser!.uid),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return Center(
                           child: Text(
                             'No notifications yet.',
@@ -57,10 +53,16 @@ class NotificationsScreen extends StatelessWidget {
                         );
                       }
 
+                      final docs = snapshot.data!.docs;
+
                       return ListView.builder(
-                        itemCount: notificationList.length,
+                        itemCount: docs.length,
                         itemBuilder: (context, index) {
-                          final notification = notificationList[index];
+                          final data = docs[index].data() as Map<String, dynamic>;
+                          final Timestamp? timestamp = data['timestamp'] as Timestamp?;
+
+                          final notification = AppNotification(title: data['title'] ?? 'Notification', body: data['body'] ?? '', timestamp: timestamp?.toDate() ?? DateTime.now());
+
                           return _buildNotificationCard(context, notification);
                         },
                       );
