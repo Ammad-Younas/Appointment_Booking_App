@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Specialty categories
   final List<Map<String, dynamic>> _specialties = [
-    {'name': 'Nerologist', 'icon': Icons.psychology},
+    {'name': 'Neurologist', 'icon': Icons.psychology},
     {'name': 'Cardiologist', 'icon': Icons.favorite},
     {'name': 'Dentist', 'icon': Icons.healing},
     {'name': 'Therapist', 'icon': Icons.medical_services},

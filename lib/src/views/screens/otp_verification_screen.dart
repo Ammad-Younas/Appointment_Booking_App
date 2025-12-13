@@ -1,4 +1,5 @@
 import 'package:appointment_booking_app/src/views/screens/update_password_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
@@ -133,14 +134,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     // Combine the controllers to get the full OTP
                     String otp = _pin1Controller.text + _pin2Controller.text + _pin3Controller.text + _pin4Controller.text;
 
-                    print('Verify OTP Button Pressed!');
-                    print('Full OTP: $otp');
+                    debugPrint('Verify OTP Button Pressed!');
+                    debugPrint('Full OTP: $otp');
 
-                    // TODO: Add logic to verify OTP
+                    // Validate OTP input
                     if (otp.length == 4) {
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) => const UpdatePasswordScreen()));
                     } else {
-                      // TODO: Show error
+                      // Show error message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Please enter a complete 4-digit OTP'),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
