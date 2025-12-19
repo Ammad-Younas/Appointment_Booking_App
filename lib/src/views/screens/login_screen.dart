@@ -97,7 +97,6 @@ class _LoginScreenState extends State<LoginScreen> {
             },
             child: const Text('OK'),
           ),
-          // Optionally add a Resend Email button here in future
         ],
       ),
     );
