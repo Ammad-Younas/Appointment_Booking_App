@@ -82,9 +82,9 @@ class MainLayoutScreenState extends State<MainLayoutScreen> {
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).cardColor,
         selectedItemColor: AppColors.madiBlue,
-        unselectedItemColor: AppColors.madiGrey,
+        unselectedItemColor: Theme.of(context).disabledColor,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
