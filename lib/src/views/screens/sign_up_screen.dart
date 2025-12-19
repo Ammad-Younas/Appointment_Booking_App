@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:appointment_booking_app/utils/app_colors.dart';
 import 'package:appointment_booking_app/src/views/widgets/app_text_field.dart';
 import 'package:appointment_booking_app/services/auth_service.dart';
-import 'package:appointment_booking_app/src/views/screens/patient_profile_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -83,8 +82,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
     // Handle result
     if (result['success']) {
       if (mounted) {
-        // Navigate to Patient Profile Screen to complete profile
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const PatientProfileScreen()), (Route<dynamic> route) => false);
+        // Show success dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Verify Email'),
+            content: const Text('Account created! Please check your email to verify your account before logging in.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); // Navigate back to Login Screen
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       }
     } else {
       _showErrorSnackBar(result['message']);

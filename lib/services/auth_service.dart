@@ -25,7 +25,13 @@ class AuthService {
       // Create user document in Firestore
       await _firestore.collection('users').doc(userCredential.user!.uid).set({'email': email, 'role': role, 'createdAt': FieldValue.serverTimestamp(), 'profileComplete': false});
 
-      return {'success': true, 'message': 'Account created successfully', 'user': userCredential.user};
+      // Send Email Verification
+      await userCredential.user!.sendEmailVerification();
+
+      // Sign out immediately so they can't access the app until verified
+      await _auth.signOut();
+
+      return {'success': true, 'message': 'Account created successfully. Please verify your email.'};
     } on FirebaseAuthException catch (e) {
       return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
@@ -38,7 +44,18 @@ class AuthService {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
 
-      return {'success': true, 'message': 'Login successful', 'user': userCredential.user};
+      User? user = userCredential.user;
+
+      if (user != null) {
+        if (!user.emailVerified) {
+          // If not verified, sign out and throw error
+          await _auth.signOut();
+          return {'success': false, 'message': 'Please verify your email before logging in.'};
+        }
+        return {'success': true, 'message': 'Login successful', 'user': user};
+      } else {
+        return {'success': false, 'message': 'Login failed. User is null.'};
+      }
     } on FirebaseAuthException catch (e) {
       return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {

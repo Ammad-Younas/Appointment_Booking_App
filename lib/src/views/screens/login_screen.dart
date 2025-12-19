@@ -62,10 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     // Attempt login
-    final result = await _authService.signInWithEmailPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+    final result = await _authService.signInWithEmailPassword(email: _emailController.text.trim(), password: _passwordController.text);
 
     // Hide loading
     setState(() {
@@ -76,13 +73,34 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result['success']) {
       if (mounted) {
         // Navigate to main screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainLayoutScreen()),
-        );
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainLayoutScreen()));
       }
     } else {
-      _showErrorSnackBar(result['message']);
+      if (result['message'] == 'Please verify your email before logging in.') {
+        _showVerificationDialog();
+      } else {
+        _showErrorSnackBar(result['message']);
+      }
     }
+  }
+
+  void _showVerificationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Email Verification Required'),
+        content: const Text('Please check your email and verify your account to proceed.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+          // Optionally add a Resend Email button here in future
+        ],
+      ),
+    );
   }
 
   // Show error snackbar
@@ -92,9 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -102,9 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Stack(
@@ -119,76 +133,44 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Header Title
                   Text(
                     'Appointly',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 34.0,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.madiBlue,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontSize: 34.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
                   ),
                   const SizedBox(height: 70.0),
 
                   // Login Title
                   Text(
                     'Login',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 28.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontSize: 28.0, fontWeight: FontWeight.bold, color: Colors.black),
                   ),
                   const SizedBox(height: 8.0),
 
                   // Login Description
                   Text(
                     'Login to continue using App',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 16.0,
-                      color: AppColors.madiGrey,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, color: AppColors.madiGrey),
                   ),
                   const SizedBox(height: 40.0),
 
                   // Email Label
                   Text(
                     'Email',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
                   ),
                   const SizedBox(height: 8.0),
 
                   // Email Text Field
-                  AppTextField(
-                    controller: _emailController,
-                    hintText: 'Enter your email',
-                    keyboardType: TextInputType.emailAddress,
-                  ),
+                  AppTextField(controller: _emailController, hintText: 'Enter your email', keyboardType: TextInputType.emailAddress),
                   const SizedBox(height: 24.0),
 
                   // Password Label
                   Text(
                     'Password',
-                    style: TextStyle(
-                      fontFamily: 'Ubuntu',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontFamily: 'Ubuntu', fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black),
                   ),
                   const SizedBox(height: 8.0),
 
                   // Password Text Field
-                  AppTextField(
-                    controller: _passwordController,
-                    hintText: 'Enter password',
-                    isPassword: true,
-                  ),
+                  AppTextField(controller: _passwordController, hintText: 'Enter password', isPassword: true),
                   const SizedBox(height: 12.0),
 
                   // Forgot Password
@@ -196,19 +178,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const ForgotPasswordScreen(),
-                          ),
-                        );
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()));
                       },
                       child: Text(
                         'Forgot Password?',
-                        style: TextStyle(
-                          fontFamily: 'Ubuntu',
-                          color: AppColors.madiBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontFamily: 'Ubuntu', color: AppColors.madiBlue, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -223,29 +197,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.madiBlue,
                         disabledBackgroundColor: AppColors.madiBlue.withOpacity(0.6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                         elevation: 0,
                       ),
                       child: _isLoading
-                          ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
+                          ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                           : Text(
-                        'Login',
-                        style: TextStyle(
-                          fontFamily: 'Ubuntu',
-                          color: Colors.white,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                              'Login',
+                              style: TextStyle(fontFamily: 'Ubuntu', color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 60.0),
@@ -256,32 +216,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: <Widget>[
                       Text(
                         "Don't have an account? ",
-                        style: TextStyle(
-                          fontFamily: 'Ubuntu',
-                          fontSize: 15.0,
-                          color: Colors.black,
-                        ),
+                        style: TextStyle(fontFamily: 'Ubuntu', fontSize: 15.0, color: Colors.black),
                       ),
                       TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
+                        style: TextButton.styleFrom(padding: EdgeInsets.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const SignUpScreen(),
-                            ),
-                          );
+                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignUpScreen()));
                         },
                         child: Text(
                           'Register',
-                          style: TextStyle(
-                            fontFamily: 'Ubuntu',
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.madiBlue,
-                          ),
+                          style: TextStyle(fontFamily: 'Ubuntu', fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.madiBlue),
                         ),
                       ),
                     ],
