@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Specialty categories
   final List<Map<String, dynamic>> _specialties = [
-    {'name': 'Nerologist', 'icon': Icons.psychology},
+    {'name': 'Neurologist', 'icon': Icons.psychology},
     {'name': 'Cardiologist', 'icon': Icons.favorite},
     {'name': 'Dentist', 'icon': Icons.healing},
     {'name': 'Therapist', 'icon': Icons.medical_services},
@@ -72,14 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: IconButton(
                         icon: Icon(Icons.notifications_outlined, color: Theme.of(context).iconTheme.color, size: 28),
                         onPressed: () {
-                          // Switch to Notifications tab (index 2)
-                          final mainLayoutState = context.findAncestorStateOfType<MainLayoutScreenState>();
-                          if (mainLayoutState != null) {
-                            mainLayoutState.changeTab(2);
-                          } else {
-                            // Fallback if not in MainLayout (shouldn't happen normally)
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const NotificationsScreen()));
-                          }
+                          // Navigate to Notifications Screen
+                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => const NotificationsScreen()));
                         },
                       ),
                     ),

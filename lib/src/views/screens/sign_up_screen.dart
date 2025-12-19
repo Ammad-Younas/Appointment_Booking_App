@@ -84,6 +84,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (mounted) {
         // Show success dialog
         showDialog(
+          barrierDismissible: false, // Prevent dismissal by clicking outside
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Verify Email'),

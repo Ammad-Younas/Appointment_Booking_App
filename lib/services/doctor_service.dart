@@ -30,7 +30,7 @@ class Doctor {
   }
 
   Map<String, dynamic> toMap() {
-    return {'name': name, 'specialty': specialty, 'rating': rating, 'price': price, 'slots': slots, 'image': image, 'about': about, 'qualification': qualification, 'location': location};
+    return {'id': id, 'name': name, 'specialty': specialty, 'rating': rating, 'price': price, 'slots': slots, 'image': image, 'about': about, 'qualification': qualification, 'location': location};
   }
 }
 

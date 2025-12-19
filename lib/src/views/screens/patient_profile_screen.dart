@@ -209,9 +209,50 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _phoneController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill all required fields (Name, Email, Phone)'), backgroundColor: Colors.red));
+    // 1. Required Fields Check
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter your Name'), backgroundColor: Colors.red));
       return;
+    }
+    if (_phoneController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter your Phone Number'), backgroundColor: Colors.red));
+      return;
+    }
+    if (_ageController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter your Age'), backgroundColor: Colors.red));
+      return;
+    }
+
+    // 2. Format Validations
+    // Phone: Simple check for 10-15 digits
+    if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(_phoneController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid Phone Number (10-15 digits)'), backgroundColor: Colors.red));
+      return;
+    }
+
+    // Age: Numeric and reasonable range (0-120)
+    final int? age = int.tryParse(_ageController.text.trim());
+    if (age == null || age <= 0 || age > 120) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid Age (1-120)'), backgroundColor: Colors.red));
+      return;
+    }
+
+    // Height: Numeric (cm)
+    if (_heightController.text.isNotEmpty) {
+      final double? height = double.tryParse(_heightController.text.trim());
+      if (height == null || height <= 0 || height > 300) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid Height in cm'), backgroundColor: Colors.red));
+        return;
+      }
+    }
+
+    // Weight: Numeric (kg)
+    if (_weightController.text.isNotEmpty) {
+      final double? weight = double.tryParse(_weightController.text.trim());
+      if (weight == null || weight <= 0 || weight > 500) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid Weight in kg'), backgroundColor: Colors.red));
+        return;
+      }
     }
 
     setState(() {

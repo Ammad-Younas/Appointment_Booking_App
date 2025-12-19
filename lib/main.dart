@@ -85,7 +85,12 @@ class _MyAppState extends State<MyApp> {
                 return const Scaffold(body: Center(child: CircularProgressIndicator()));
               }
               if (snapshot.hasData) {
-                return const MainLayoutScreen();
+                // Prevent auto-login if email is not verified (e.g. immediately after sign up)
+                if (snapshot.data!.emailVerified) {
+                  return const MainLayoutScreen();
+                }
+                // If not verified, stay on Login Screen (AuthService will sign them out anyway)
+                return const LoginScreen();
               }
               return const LoginScreen();
             },

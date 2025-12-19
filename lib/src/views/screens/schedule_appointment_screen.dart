@@ -200,7 +200,7 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
     // Book appointment in Firestore
     final result = await _appointmentService.bookAppointment(
       userId: user.uid,
-      doctorId: widget.doctorData['name'], // Using name as ID for now or generate one
+      doctorId: widget.doctorData['id'], // Correctly using the ID from the previous screen
       doctorName: doctorName,
       patientName: widget.patientData['name'] ?? 'User',
       doctorImage: widget.doctorData['image'] ?? widget.doctorData['imageUrl'],
@@ -242,6 +242,11 @@ class _ScheduleAppointmentScreenState extends State<ScheduleAppointmentScreen> {
 
       // Show immediate confirmation
       NotificationService.showNotification(id: DateTime.now().millisecondsSinceEpoch ~/ 1000, title: 'Appointment Confirmed!', body: 'Your appointment with $doctorName on $date at $_selectedTimeSlot is confirmed.', userId: user.uid);
+
+      // --- Notify the Doctor ---
+      // This ensures the doctor sees the new appointment in their "Notifications" tab
+      final String doctorId = widget.doctorData['id'];
+      await NotificationService.saveNotificationToFirestore(doctorId, 'New Appointment', 'You have a new appointment with ${widget.patientData['name'] ?? 'a patient'} on $date at $_selectedTimeSlot.');
 
       _showConfirmationDialog('Booking Successful!', 'Your appointment with $doctorName on $date at $_selectedTimeSlot has been confirmed.');
     } else {
